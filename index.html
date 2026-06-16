@@ -282,10 +282,10 @@
       <div class="card__ja">お誕生日</div>
       <div class="field">
         <div class="field__lbl"><span>月日</span><span class="en">your day</span></div>
-        <input type="text" id="bday" inputmode="numeric" placeholder="例：0720（7月20日・数字4桁）"
-          style="width:100%;border:1px solid var(--line);background:var(--ivory);border-radius:14px;padding:13px 16px;font-family:inherit;color:var(--ink);font-size:15px;">
+        <input type="text" id="bday" inputmode="numeric" placeholder="例：0720"
+          style="width:140px;border:1px solid var(--line);background:var(--ivory);border-radius:12px;padding:9px 14px;font-family:inherit;color:var(--ink);font-size:14px;">
       </div>
-      <p class="note" style="margin-top:8px;">登録すると、その日の朝、あなたへのメッセージが届きます。</p>
+      <p class="note" style="margin-top:8px;">数字4桁で入力（例：0720＝7月20日）。登録すると、その日の朝メッセージが届きます。</p>
     </section>
 
     <!-- バックアップ -->
@@ -437,6 +437,7 @@ function renderPanel(){
   document.getElementById("plan").value  = r.plan || "";
   document.getElementById("diary").value = r.diary || "";
   document.getElementById("period").classList.toggle("on", !!r.period);
+  growAll();
 }
 document.querySelectorAll(".pillar").forEach(p=>{
   p.addEventListener("click", ()=>{ const k=p.dataset.key; const r=rec(); r[k]=!r[k];
@@ -644,11 +645,17 @@ document.getElementById("importFile").addEventListener("change", (e)=>{
   reader.readAsText(file); e.target.value="";
 });
 
+/* ===== 記入欄を、書いた分だけ自動で伸ばす（隠れないように） ===== */
+function growArea(t){ if(!t) return; t.style.height="auto"; t.style.height=t.scrollHeight+"px"; }
+function growAll(){ document.querySelectorAll("textarea.area").forEach(growArea); }
+document.addEventListener("input", (e)=>{ if(e.target && e.target.classList && e.target.classList.contains("area")) growArea(e.target); });
+
 /* ===== 起動 ===== */
 function renderAll(){
   renderCalendar(); renderPanel();
   document.getElementById("wants").value=DB.wants||"";
   buildWheel(); buildWheelItems();
+  growAll();
 }
 renderAll();
 </script>
