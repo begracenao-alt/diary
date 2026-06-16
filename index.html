@@ -282,7 +282,7 @@
       <div class="card__ja">お誕生日</div>
       <div class="field">
         <div class="field__lbl"><span>月日</span><span class="en">your day</span></div>
-        <input type="text" id="bday" inputmode="numeric" placeholder="例：3/21（月／日）"
+        <input type="text" id="bday" inputmode="numeric" placeholder="例：0720（7月20日・数字4桁）"
           style="width:100%;border:1px solid var(--line);background:var(--ivory);border-radius:14px;padding:13px 16px;font-family:inherit;color:var(--ink);font-size:15px;">
       </div>
       <p class="note" style="margin-top:8px;">登録すると、その日の朝、あなたへのメッセージが届きます。</p>
@@ -509,12 +509,22 @@ const BIRTHDAY_MSG=`お誕生日おめでとうございます！
 function isBirthday(){
   let b=(DB.birthday||"").trim(); if(!b) return false;
   b=b.replace(/[０-９]/g, c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)); // 全角数字→半角
-  const m=b.match(/(\d{1,2})\D+(\d{1,2})/);
-  return !!m && (+m[1]===TODAY.getMonth()+1) && (+m[2]===TODAY.getDate());
+  const d=b.replace(/[^0-9]/g,""); // 数字だけ
+  let mo, da;
+  if(d.length===4){ mo=+d.slice(0,2); da=+d.slice(2); }      // 0720 → 7/20
+  else if(d.length===3){ mo=+d.slice(0,1); da=+d.slice(1); } // 旧データ 3/21(→321) 互換
+  else return false;
+  return mo===TODAY.getMonth()+1 && da===TODAY.getDate();
 }
 (function(){
   const el=document.getElementById("bday"); el.value=DB.birthday||"";
-  el.addEventListener("input", ()=>{ DB.birthday=el.value; saveAll(); updateStats(); });
+  el.addEventListener("input", ()=>{
+    let v=el.value.replace(/[０-９]/g, c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0)); // 全角→半角
+    v=v.replace(/[^0-9]/g,"").slice(0,4);          // 数字だけ・最大4桁
+    if(v.length>2) v=v.slice(0,2)+"/"+v.slice(2);  // 0720 → 07/20 に自動整形
+    el.value=v;
+    DB.birthday=v; saveAll(); updateStats();
+  });
   el.addEventListener("blur", flashSaved);
 })();
 
